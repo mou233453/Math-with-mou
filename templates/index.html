@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>math with Mou</title>
+    <title>المدقق الرياضي الذكي</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     
@@ -16,119 +16,190 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 
     <style>
+        /* تعريف متغيرات الألوان للوضع النهاري والليلي */
+        :root {
+            --bg-color: #f4f7f6;
+            --grid-color: rgba(52, 152, 219, 0.12);
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #1e293b;
+            --text-subtitle: #64748b;
+            --border-color: rgba(255, 255, 255, 0.6);
+            --upload-bg: rgba(248, 250, 252, 0.7);
+            --upload-border: #cbd5e1;
+            --upload-hover: rgba(239, 246, 255, 0.9);
+            --symbol-color: rgba(52, 152, 219, 0.15);
+            --btn-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --btn-shadow: rgba(37, 99, 235, 0.25);
+            --result-bg: #f8fafc;
+            --result-border: #e2e8f0;
+            --toggle-bg: #ffffff;
+            --toggle-shadow: rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --grid-color: rgba(56, 189, 248, 0.05);
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --text-main: #f8fafc;
+            --text-subtitle: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --upload-bg: rgba(15, 23, 42, 0.6);
+            --upload-border: #334155;
+            --upload-hover: rgba(30, 41, 59, 0.9);
+            --symbol-color: rgba(56, 189, 248, 0.08);
+            --btn-bg: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
+            --btn-shadow: rgba(0, 0, 0, 0.5);
+            --result-bg: #1e293b;
+            --result-border: #334155;
+            --toggle-bg: #1e293b;
+            --toggle-shadow: rgba(0,0,0,0.5);
+        }
+
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body {
             margin: 0; padding: 0; min-height: 100vh;
             display: flex; justify-content: center; align-items: center;
-            background-color: #f4f7f6;
+            background-color: var(--bg-color);
             background-image: 
-                linear-gradient(rgba(52, 152, 219, 0.12) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(52, 152, 219, 0.12) 1px, transparent 1px);
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
             background-size: 25px 25px; 
-            overflow-x: hidden; /* لمنع ظهور شريط التمرير الأفقي في الشاشة كلها */
+            overflow-x: hidden; 
             position: relative;
+            transition: background-color 0.5s ease;
         }
 
-        /* الرموز الخلفية */
-        .math-symbol { position: absolute; color: rgba(52, 152, 219, 0.15); font-size: 80px; font-weight: bold; z-index: -1; user-select: none; animation: float 6s ease-in-out infinite; }
-        .symbol-1 { top: 10%; left: 10%; animation-delay: 0s; }
-        .symbol-2 { top: 70%; left: 15%; animation-delay: 1s; font-size: 100px; }
-        .symbol-3 { top: 15%; right: 10%; animation-delay: 2s; font-size: 90px; }
-        .symbol-4 { top: 80%; right: 15%; animation-delay: 3s; }
+        /* زر الوضع الليلي/النهاري */
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--toggle-bg);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px var(--toggle-shadow);
+            z-index: 100;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
 
-        @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-20px) rotate(5deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+        /* الرموز الخلفية (معادلات متقدمة) */
+        .math-symbol { 
+            position: absolute; color: var(--symbol-color); 
+            font-size: 35px; font-weight: bold; z-index: -1; 
+            user-select: none; transition: color 0.5s ease;
+            white-space: nowrap;
+        }
+        
+        /* توزيع الرموز وحركتها */
+        .sym-1 { top: 10%; left: 5%; animation: float 7s ease-in-out infinite; font-size: 60px; }
+        .sym-2 { top: 65%; left: 8%; animation: float 9s ease-in-out infinite reverse; }
+        .sym-3 { top: 15%; right: 5%; animation: float 8s ease-in-out infinite; }
+        .sym-4 { top: 80%; right: 10%; animation: float 6s ease-in-out infinite reverse; font-size: 50px; }
+        .sym-5 { top: 40%; left: 2%; animation: float 10s ease-in-out infinite; }
+        .sym-6 { top: 35%; right: -2%; animation: float 11s ease-in-out infinite reverse; }
+        .sym-7 { top: 85%; left: 40%; animation: float 7s ease-in-out infinite; }
 
-        /* الصندوق الرئيسي متجاوب */
+        @keyframes float { 
+            0% { transform: translateY(0px) rotate(0deg); } 
+            50% { transform: translateY(-25px) rotate(3deg); } 
+            100% { transform: translateY(0px) rotate(0deg); } 
+        }
+
+        /* الصندوق الرئيسي */
         .glass-card {
-            background: rgba(255, 255, 255, 0.9); 
+            background: var(--card-bg); 
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.6); 
-            width: 92%; /* يأخذ 92% من الشاشة في الموبايل */
-            max-width: 550px; /* لا يتعدى هذا الحجم في الحاسوب */
-            border-radius: 24px;
-            padding: 40px; 
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0,0,0,0.05); 
+            border: 1px solid var(--border-color); 
+            width: 92%; max-width: 550px; 
+            border-radius: 24px; padding: 40px; 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); 
             text-align: center; z-index: 10;
-            margin: 20px 0; /* مسافة أمان من الأعلى والأسفل للموبايل */
+            transition: all 0.5s ease;
         }
 
-        .header-icon { font-size: 45px; margin-bottom: 5px; text-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block; }
-        h1 { color: #1e293b; font-size: 28px; font-weight: 900; margin: 0 0 5px 0; letter-spacing: -0.5px; }
-        p.subtitle { color: #64748b; font-size: 15px; margin-bottom: 30px; }
+        .header-icon { font-size: 50px; margin-bottom: 5px; text-shadow: 0 4px 10px rgba(0,0,0,0.1); display: block; }
+        h1 { color: var(--text-main); font-size: 28px; font-weight: 900; margin: 0 0 5px 0; letter-spacing: -0.5px; transition: color 0.5s ease; }
+        p.subtitle { color: var(--text-subtitle); font-size: 15px; margin-bottom: 30px; transition: color 0.5s ease; }
         
         .upload-area {
-            border: 2px dashed #cbd5e1; border-radius: 16px; padding: 30px 15px; cursor: pointer;
-            transition: all 0.3s ease; background-color: rgba(248, 250, 252, 0.8);
+            border: 2px dashed var(--upload-border); border-radius: 16px; padding: 30px 15px; cursor: pointer;
+            transition: all 0.3s ease; background-color: var(--upload-bg);
             margin-bottom: 25px; position: relative;
         }
-        .upload-area:hover, .upload-area:active { border-color: #3b82f6; background-color: rgba(239, 246, 255, 0.9); }
+        .upload-area:hover, .upload-area:active { border-color: #3b82f6; background-color: var(--upload-hover); }
         .upload-area input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; z-index: 2; }
         
-        .upload-icon { font-size: 35px; margin-bottom: 10px; color: #475569; }
-        .upload-text { color: #64748b; font-size: 15px; font-weight: 600; }
-        .file-name { margin-top: 12px; font-size: 14px; color: #2563eb; font-weight: 700; word-break: break-all; }
+        .upload-icon { font-size: 35px; margin-bottom: 10px; color: var(--text-subtitle); }
+        .upload-text { color: var(--text-subtitle); font-size: 15px; font-weight: 600; }
+        .file-name { margin-top: 12px; font-size: 14px; color: #3b82f6; font-weight: 700; word-break: break-all; }
         
         .analyze-btn {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none;
+            background: var(--btn-bg); color: white; border: none;
             width: 100%; padding: 16px; font-size: 17px; font-weight: 700; border-radius: 14px; cursor: pointer;
-            transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
-            position: relative; overflow: hidden;
+            transition: all 0.3s ease; box-shadow: 0 10px 20px var(--btn-shadow);
         }
-        .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(37, 99, 235, 0.3); }
-        .analyze-btn:active { transform: translateY(0); }
+        .analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px var(--btn-shadow); }
         .analyze-btn:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
         
         #resultBox {
             margin-top: 25px; padding: 20px; border-radius: 14px; font-size: 17px; font-weight: 700;
             line-height: 1.8; display: none; text-align: right; 
-            overflow-x: auto; /* شريط تمرير للمعادلات الطويلة في الموبايل */
-            direction: rtl; 
+            overflow-x: auto; direction: rtl; 
+            color: var(--text-main);
+            background: var(--result-bg);
+            border: 1px solid var(--result-border);
         }
         
         mjx-container { display: inline-block !important; direction: ltr; max-width: 100%; }
         
-        .correct { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .incorrect { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; animation: shake 0.4s ease-in-out; }
-        .loading-state { background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; text-align: center !important; }
+        .correct { background: rgba(16, 185, 129, 0.1) !important; color: #10b981 !important; border-color: #34d399 !important; animation: popIn 0.4s ease; }
+        .incorrect { background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; border-color: #f87171 !important; animation: shake 0.4s ease; }
+        .loading-state { text-align: center !important; }
         
         @keyframes popIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         
         .loader {
-            border: 3px solid #e2e8f0; border-top: 3px solid #3b82f6; border-radius: 50%; width: 20px; height: 20px;
+            border: 3px solid var(--border-color); border-top: 3px solid #3b82f6; border-radius: 50%; width: 20px; height: 20px;
             animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-left: 8px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 📱 تعديلات خاصة بشاشات الموبايل 📱 */
+        /* تعديلات الموبايل */
         @media (max-width: 600px) {
-            .glass-card { padding: 30px 20px; border-radius: 20px; }
+            .glass-card { padding: 30px 20px; }
             h1 { font-size: 24px; }
-            p.subtitle { font-size: 14px; margin-bottom: 25px; }
-            .header-icon { font-size: 40px; }
-            .upload-area { padding: 25px 10px; }
-            .upload-icon { font-size: 30px; }
-            .upload-text { font-size: 14px; }
-            .analyze-btn { padding: 15px; font-size: 16px; }
-            #resultBox { font-size: 15px; padding: 15px; }
-            /* إخفاء بعض الرموز لتخفيف الزحمة على الموبايل */
-            .symbol-1, .symbol-4 { display: none; }
-            .symbol-2 { font-size: 60px; top: 80%; left: 5%; }
-            .symbol-3 { font-size: 50px; top: 10%; right: 5%; }
+            .theme-toggle { top: 15px; left: 15px; width: 45px; height: 45px; font-size: 20px; }
+            .sym-5, .sym-6 { display: none; } /* إخفاء بعض الرموز لتخفيف الزحمة */
+            .sym-1 { font-size: 40px; }
+            .sym-4 { font-size: 35px; }
         }
     </style>
 </head>
 <body>
 
-<div class="math-symbol symbol-1">∫</div>
-<div class="math-symbol symbol-2">π</div>
-<div class="math-symbol symbol-3">∑</div>
-<div class="math-symbol symbol-4">√</div>
+<button class="theme-toggle" id="themeToggle" title="تغيير المظهر">🌙</button>
+
+<div class="math-symbol sym-1">\( \mathcal{H} \)</div>
+<div class="math-symbol sym-2">\( \langle f, e_i \rangle \)</div>
+<div class="math-symbol sym-3">\( A\|x\|^2 \leq \sum |\langle x, f_i \rangle|^2 \)</div>
+<div class="math-symbol sym-4">\( \int_{-\infty}^{\infty} e^{-x^2} dx \)</div>
+<div class="math-symbol sym-5">\( \hat{f}(\xi) \)</div>
+<div class="math-symbol sym-6">\( \nabla \times \mathbf{E} \)</div>
+<div class="math-symbol sym-7">\( T^* T \)</div>
 
 <div class="glass-card">
-    <div class="header-icon">✨</div>
-    <h1>مساعد و مدقق الرياضي</h1>
+    <div class="header-icon">🪐</div>
+    <h1>المدقق الرياضي</h1>
     <p class="subtitle">صور مسألتك، وسأكتشف الخطأ في ثوانٍ</p>
     
     <div class="upload-area" id="uploadArea">
@@ -144,6 +215,29 @@
 </div>
 
 <script>
+    // --- تفعيل الوضع الليلي ---
+    const themeToggle = document.getElementById('themeToggle');
+    // التحقق من الذاكرة إذا كان المستخدم يفضل المود الليلي
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.innerText = '☀️';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        let theme = document.documentElement.getAttribute('data-theme');
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+            themeToggle.innerText = '🌙';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            themeToggle.innerText = '☀️';
+        }
+    });
+
+    // --- دوال التحليل ---
     function updateFileName() {
         const input = document.getElementById('imageInput');
         const display = document.getElementById('fileNameDisplay');
@@ -162,6 +256,7 @@
             return;
         }
 
+        // إعادة ضبط الكلاسات للوضع الافتراضي عند بدء التحميل
         resultBox.className = "loading-state";
         resultBox.style.display = "block";
         resultBox.innerHTML = '<div class="loader"></div> جاري تحليل الخطوات...';
@@ -186,15 +281,13 @@
             }
 
             if (resultText.includes("✅")) {
-                resultBox.className = "correct";
+                resultBox.classList.add("correct");
             } else if (resultText.includes("❌")) {
-                resultBox.className = "incorrect";
-            } else {
-                resultBox.className = "loading-state"; 
+                resultBox.classList.add("incorrect");
             }
             
         } catch (error) {
-            resultBox.className = "incorrect";
+            resultBox.classList.add("incorrect");
             resultBox.innerText = "حدث خطأ في الاتصال. تأكد من جودة الإنترنت.";
         } finally {
             analyzeBtn.disabled = false;
